@@ -37,7 +37,7 @@ class cpg(object):
         dx'/dt  = (-x' + y)/T
         y       = g(x)
         """
-        x = list(vector.reshape(3,num))
+        x = vector.hsplit(3)
         #x_dt = (-x[0]-np.dot(x[2],A)+s+b*x[1])
         #xd_dt = (-x[1]+x[2])/T
         #y_dt = g(x[0])
