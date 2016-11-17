@@ -21,10 +21,10 @@ class cpg(object):
 
     def __call__(self,t,s):
         """s:input vector"""
-        self.x   = odeint(self.func,self.x,t,args=(self.num,s,self.A,self.b,self.T,self.g))
+        self.x   = odeint(self.func,self.x,t,args=(s,))
         return self.x
 
-    def func(self,vector,t,num,s,A,b,T,g):
+    def func(self,vector,t,s):
         """
         x[0]: voltage
         t   :
@@ -37,18 +37,8 @@ class cpg(object):
         dx'/dt  = (-x' + y)/T
         y       = g(x)
         """
-        x = vector.hsplit(3)
-        #x_dt = (-x[0]-np.dot(x[2],A)+s+b*x[1])
-        #xd_dt = (-x[1]+x[2])/T
-        #y_dt = g(x[0])
-        #print('vec',vector)
-        #print('dt',x_dt,xd_dt,y_dt)
-        #ret = np.r_[x_dt,xd_dt,y_dt]
-        #print('ret',ret)
-        #print('time',t)
-        #print('s',s)
-        #return ret
-        return np.r_[(-x[0]-np.dot(x[2],A)+s+b*x[1]),(-x[1]+x[2])/T,g(x[0])]
+        x = np.hsplit(vector,3)
+        return np.r_[(-x[0]-np.dot(x[2],self.A)+s+self.b*x[1]),(-x[1]+x[2])/self.T,self.g(x[0])]
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
