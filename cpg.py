@@ -53,9 +53,9 @@ if __name__ == '__main__':
     t = np.linspace(0,10,10001)
     y = c(t,s)
     #y = [d[2*neuronum:] for d in y]
-    lgr = logger(['voltage','adaptation','output'],'/home/yihome/Pictures/log/cpg/')
+    lgr = logger(['voltage','adaptation','output'])
     for i,d in enumerate(y):
         #print(i)
         lgr.append(np.hsplit(d,3))
 
-    lgr.output(show=True)
+    lgr.output('/home/yihome/Pictures/log/cpg/',t,show=True)
