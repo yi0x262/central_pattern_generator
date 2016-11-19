@@ -17,7 +17,7 @@ class logger(object):
         """
         for i,datum in enumerate(data):
             self.logdata[i].append(datum)#[:])#get copy
-    def output(self,logpath,t,each_axes_save=False,show=False):
+    def output(self,logpath,t,title=None,each_axes_save=False,show=False):
         """
         logpath : abs dir path
         """
@@ -29,6 +29,10 @@ class logger(object):
             axes = figure.add_subplot(len(self.lognames),1,i+1)
             self.generate_each_graph(axes,t,datum,savedir,name,each_axes_save)
 
+        #
+        if not title is None:
+            figure.suptitle(title,fontsize=12)
+
         figure.savefig(savedir+'.jpg')
         if show:
             figure.show()
@@ -37,7 +41,6 @@ class logger(object):
         savepath: abs path
         data    : [data_0,data_1,...]
         """
-        #axes.title(os.path.basename(savepath).split('.')[0])#????text is not calable?
         axes.plot(x,y)
         axes.set_title(name)
 
