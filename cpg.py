@@ -41,17 +41,21 @@ class cpg(object):
         return np.r_[(-x[0]-np.dot(x[2],self.A)+ss+self.b*x[1]),(-x[1]+x[2])/self.T,self.g(x[0])]
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    from save_plot import logger
 
-    neuronum = 2
-    times = 100
-    A = [[0,2.5],[2.5,0]]
-    c = cpg(neuronum,A,x0=[1,0,0,0,0,0])
+    neuronum = 3
+    a = 2.5
+    A = a - a*np.eye(neuronum)
+    print(A)
+    c = cpg(neuronum,A,x0=[1,0,0.5,0,0,0,0,0,0])
 
-    s = [0.,0.]
-    t = np.linspace(0,10,10000001)
+    s = [1.,1.,1.]
+    t = np.linspace(0,10,10001)
     y = c(t,s)
     #y = [d[2*neuronum:] for d in y]
+    lgr = logger(['voltage','adaptation','output'],'/home/yihome/Pictures/log/cpg/')
+    for i,d in enumerate(y):
+        #print(i)
+        lgr.append(np.hsplit(d,3))
 
-    plt.plot(t,y)
-    plt.show()
+    lgr.output(show=True)

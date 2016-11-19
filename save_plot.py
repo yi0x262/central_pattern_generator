@@ -13,7 +13,7 @@ class plotter(object):#matplotlib.figure.Figure):
         lognames: [name1,name2,...] name:str
         data    : [[data1_0,data1_1,...],[data2_0,...],...]
         """
-        os.makedirs(logpath)
+        os.makedirs(logpath,exist_ok=True)
         timestr = datetime.now().strftime('%Y%m%d_%H%M%S')#get nowtime(YearmonthDay_HourMinuteSecond)
         figure = plt.figure(figsize=(8,3*len(lognames)))
         for i,(datum,name) in enumerate(zip(data,lognames)):
@@ -49,7 +49,6 @@ class logger(plotter):
         for i,datum in enumerate(data):
             self.logdata[i].append(datum)#[:])#get copy
     def output(self,each_axes_save=False,show=False):
-        print(self.logdata)
         self.save_data(self.logpath,self.lognames,self.logdata,each_axes_save=each_axes_save,show=show)
 
 if __name__ == '__main__':
