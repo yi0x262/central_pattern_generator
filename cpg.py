@@ -6,44 +6,56 @@ from scipy.integrate import odeint
 #Enhancing Humanoid Learning Abilties; Scalable Learning through Task-Relevant Features (Matsubara,2007)
 
 class cpg(object):
-    def __init__(self,num,A,b=2.5,T=12,x0=[0,0,0,0,0,0]):
+    def __init__(self,num,A,b=2.5,T=12,x0=None):
         """
         A (const) : strengths of an inhibitory connection between neurons (i!=j:aij>0,i==j:aij=0)
         b (const) : time cources of adaptation (2.5)
         T (const) : time cources of adaptation (12)
         """
         self.A = np.array(A)
-        self.g = np.tanh
 
+        self.num = num
         self.b = b
         self.T = T
+
+        if x0 is None:
+            x0 = np.zeros(num*2)
         self.x = np.array(x0)
-        self.num = num
 
-    #def g(self,x):
-    #    return np.maximum(0,x)
+    def g(self,x):
+        """g(x) = max(0,x)"""
+        return np.maximum(0,x)
 
-    def __call__(self,t,s):
+    def __call__(self,dt,s):
         """s:input vector"""
-        self.x   = odeint(self.func,self.x,t,args=(s,))
-        return self.x
+        np.linspace(0,dt,1001)
+        self.x   = odeint(self.func,self.x,t,args=(s,))[-1]
+        return self.output()#return y
+
+    def output(self):
+        """y = g(x)"""
+        return self.g(self.x[:self.num])
 
     def func(self,vector,t,s):
         """
         x[0]: voltage
         x[1]: adaptation
-        x[2]: output
         t   :
         s   : input
         b,T : time cources of adaptation (scalar?)
+        y   : output. y = g(x) = max(0,x)
 
-        dx/dt   = -x - yA + s - bx'
-        dx'/dt  = (-x' + y)/T
-        y       = g(x)
+        dx0/dt   = -x0 - yA + s - bx1
+        dx1/dt  = (-x1 + y)/T
         """
-        x = np.hsplit(vector,3)
+        x = np.hsplit(vector,2)
+        y = self.output()
         ss = np.array(s)
-        return np.r_[(-x[0]-np.dot(x[2],self.A)+ss-self.b*x[1]),(-x[1]+x[2])/self.T,self.g(x[0])]
+        return np.r_[(-x[0]-np.dot(y,self.A)+ss-self.b*x[1]),(-x[1]+y)/self.T]
+
+    def forlog(self):
+        #print(self.x,self.output())
+        return np.hsplit(np.r_[self.x,self.output()],3)
 
 if __name__ == '__main__':
     from save_plot import logger
@@ -52,16 +64,21 @@ if __name__ == '__main__':
     a = 2.5
     A = a - a*np.eye(neuronum)
     print(A)
-    c = cpg(neuronum,A,x0=[i for i in range(neuronum)]+[i for i in range(neuronum)]+[i for i in range(neuronum)])
+    x0 = [0,0]
+    x0 = [0.6,0.4,0.2,0]
+    x0 = x0+[0 for _ in range(neuronum)]
+    print(x0)
 
-    s = np.ones(neuronum)*0.1
-    t = np.linspace(0,50,100001)
-    y = c(t,s)
-    #y = [d[2*neuronum:] for d in y]
+    c = cpg(neuronum,A,x0=x0)
+
+    s = np.ones(neuronum)*1
+    t = list(np.linspace(0,0.1,1001))
     lgr = logger(['voltage','adaptation','output'])
-    for i,d in enumerate(y):
-        #print(i)
-        lgr.append(np.hsplit(d,3))
+    for t1,t2 in zip(t[:-1],t[1:]):
+        dt = t2-t1
+        c(dt,s)
+        #print(c.forlog())
+        lgr.append(c.forlog())
 
-    lgr.output('/home/yihome/Pictures/log/cpg/',t,show=True,
-        title='$A=a-aE$,a={},s={},b=2.5,T=12,g=tanh'.format(a,s))
+    lgr.output('/home/yihome/Pictures/log/cpg/',t[:-1],show=True,
+        title='$A=a-aE$,a={},s={},b={},T={},g=max\nx0={}'.format(a,s,c.b,c.T,x0))
