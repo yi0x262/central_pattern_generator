@@ -6,7 +6,7 @@ from scipy.integrate import odeint
 #Enhancing Humanoid Learning Abilties; Scalable Learning through Task-Relevant Features (Matsubara,2007)
 
 class cpg(object):
-    def __init__(self,num,A,b=2.5,T=12,x0=None):
+    def __init__(self,num,A,b=2.5,T=12,tau=1,x0=None):
         """
         A (const) : strengths of an inhibitory connection between neurons (i!=j:aij>0,i==j:aij=0)
         b (const) : time cources of adaptation (2.5)
@@ -17,6 +17,7 @@ class cpg(object):
         self.num = num
         self.b = b
         self.T = T
+        self.tau = tau
 
         if x0 is None:
             x0 = np.zeros(num*2)
@@ -44,6 +45,7 @@ class cpg(object):
         s   : input
         b,T : time cources of adaptation (scalar?)
         y   : output. y = g(x) = max(0,x)
+        tau : time cources for frequence
 
         dx0/dt   = -x0 - yA + s - bx1
         dx1/dt  = (-x1 + y)/T
@@ -51,34 +53,34 @@ class cpg(object):
         x = np.hsplit(vector,2)
         y = self.output()
         ss = np.array(s)
-        return np.r_[(-x[0]-np.dot(y,self.A)+ss-self.b*x[1]),(-x[1]+y)/self.T]
+        return np.r_[self.tau*(-x[0]-np.dot(y,self.A)+ss-self.b*x[1]),self.tau*(-x[1]+y)/self.T]
 
-    def forlog(self):
-        #print(self.x,self.output())
-        return np.hsplit(np.r_[self.x,self.output()],3)
 
 if __name__ == '__main__':
     from save_plot import logger
 
     neuronum = 4
     a = 2.5
-    A = a - a*np.eye(neuronum)
+    #A = a - a*np.eye(neuronum)
+    A = a - a*np.tri(neuronum)
+    A += A.T
     print(A)
-    x0 = [0,0]
-    x0 = [0.6,0.4,0.2,0]
+    #x0 = [0.25,-0.32]
+    #x0 = [0.6,0.4,0.2,0]
+    x0 = [0.01 * i for i in range(neuronum)]
+    #x0 = x0+[0.081 for _ in range(neuronum)]
     x0 = x0+[0 for _ in range(neuronum)]
     print(x0)
 
-    c = cpg(neuronum,A,x0=x0)
+    c = cpg(neuronum,A,x0=x0,tau=0.005)
 
-    s = np.ones(neuronum)*1
-    t = list(np.linspace(0,0.1,1001))
+    s = np.ones(neuronum)*0.1
+    t = list(np.linspace(0,2,10001))#about 340times/s (Ubuntu,i5-4200m @ 2.5GHz)
     lgr = logger(['voltage','adaptation','output'])
     for t1,t2 in zip(t[:-1],t[1:]):
         dt = t2-t1
-        c(dt,s)
-        #print(c.forlog())
-        lgr.append(c.forlog())
+        y = c(dt,s)
+        lgr.append(np.hsplit(np.r_[c.x,y],3))
 
     lgr.output('/home/yihome/Pictures/log/cpg/',t[:-1],show=True,
-        title='$A=a-aE$,a={},s={},b={},T={},g=max\nx0={}'.format(a,s,c.b,c.T,x0))
+        title='$A=a-a*tri$,a={},s={},b={},T={},$\\tau$={},g=max\nx0={}'.format(a,s,c.b,c.T,c.tau,x0))
