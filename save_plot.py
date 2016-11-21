@@ -2,6 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
+from copy import deepcopy
 
 class logger(object):
     def __init__(self,lognames):
@@ -16,7 +17,7 @@ class logger(object):
         data    : [data1_t,data2_t,data3_t,...]
         """
         for i,datum in enumerate(data):
-            self.logdata[i].append(datum)#[:])#get copy
+            self.logdata[i].append(deepcopy(datum))#[:])#get copy
     def output(self,logpath,t,title=None,each_axes_save=False,show=False):
         """
         logpath : abs dir path
