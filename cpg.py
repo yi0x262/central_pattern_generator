@@ -12,13 +12,12 @@ class cpg(object):
         b (const) : time cources of adaptation (2.5)
         T (const) : time cources of adaptation (12)
         """
-        self.A = np.array(A)
-
         self.num = num
         self.b = b
         self.T = T
         self.tau = tau
 
+        self.A = np.array(A)
         if x0 is None:
             x0 = np.zeros(num*2)
         self.x = np.array(x0)
@@ -27,10 +26,10 @@ class cpg(object):
         """g(x) = max(0,x)"""
         return np.maximum(0,x)
 
-    def __call__(self,dt,s):
+    def __call__(self,dt,s,devide=1000):
         """s:input vector"""
-        t = np.linspace(0,dt,1001)
-        self.x   = odeint(self.func,self.x,t,args=(s,))[-1]
+        t = np.linspace(0,dt,devide+1)
+        self.x = odeint(self.func,self.x,t,args=(s,))[-1]
         return self.output()#return y
 
     def output(self):
@@ -41,18 +40,17 @@ class cpg(object):
         """
         x[0]: voltage
         x[1]: adaptation
-        t   :
         s   : input
         b,T : time cources of adaptation (scalar?)
         y   : output. y = g(x) = max(0,x)
         tau : time cources for frequence
 
-        dx0/dt   = -x0 - yA + s - bx1
-        dx1/dt  = (-x1 + y)/T
+        tau*dx0/dt   = -x0 - yA + s - bx1
+        tau*dx1/dt  = (-x1 + y)/T
         """
         x = np.hsplit(vector,2)
         y = self.output()
-        return np.r_[self.tau*(-x[0]-np.dot(y,self.A)+s[0]-self.b*x[1]),self.tau*(-x[1]+y)/self.T]
+        return self.tau*np.r_[(-x[0]-y.dot(A)+s-self.b*x[1]),(-x[1]+y)/self.T]
 
 
 if __name__ == '__main__':
@@ -71,10 +69,10 @@ if __name__ == '__main__':
     x0 = x0+[0 for _ in range(neuronum)]
     print(x0)
 
-    c = cpg(neuronum,A,x0=x0,tau=0.005)
+    c = cpg(neuronum,A,x0=x0,tau=2)
 
     s = np.ones(neuronum)*0.1
-    t = list(np.linspace(0,2,10001))#about 340times/s (Ubuntu,i5-4200m @ 2.5GHz)
+    t = list(np.linspace(0,200,10001))#about 340times/s (Ubuntu,i5-4200m @ 2.5GHz)
     lgr = logger(['voltage','adaptation','output'])
     for t1,t2 in zip(t[:-1],t[1:]):
         dt = t2-t1
