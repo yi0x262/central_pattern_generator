@@ -25,7 +25,7 @@ class logger(object):
         os.makedirs(logpath,exist_ok=True)
         savedir = logpath+'/'+datetime.now().strftime('%Y%m%d_%H%M%S')#get nowtime(YearmonthDay_HourMinuteSecond)
 
-        figure = plt.figure(figsize=(8,3*len(self.lognames)))
+        figure = plt.figure(figsize=(16,3*len(self.lognames)))
         for i,(datum,name) in enumerate(zip(self.logdata,self.lognames)):
             axes = figure.add_subplot(len(self.lognames),1,i+1)
             self.generate_each_graph(axes,t,datum,savedir,name,each_axes_save)

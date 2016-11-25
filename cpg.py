@@ -29,7 +29,7 @@ class cpg(object):
 
     def __call__(self,dt,s):
         """s:input vector"""
-        np.linspace(0,dt,1001)
+        t = np.linspace(0,dt,1001)
         self.x   = odeint(self.func,self.x,t,args=(s,))[-1]
         return self.output()#return y
 
@@ -52,8 +52,7 @@ class cpg(object):
         """
         x = np.hsplit(vector,2)
         y = self.output()
-        ss = np.array(s)
-        return np.r_[self.tau*(-x[0]-np.dot(y,self.A)+ss-self.b*x[1]),self.tau*(-x[1]+y)/self.T]
+        return np.r_[self.tau*(-x[0]-np.dot(y,self.A)+s[0]-self.b*x[1]),self.tau*(-x[1]+y)/self.T]
 
 
 if __name__ == '__main__':
