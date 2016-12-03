@@ -27,8 +27,9 @@ class cpg(object):
         return np.maximum(0,x)
 
     def __call__(self,dt,s,devide=1000):
-        """s:input vector"""
+        """s:input vector (ndim = 1)"""
         t = np.linspace(0,dt,devide+1)
+        #print('cpg_call',s,self.x)
         self.x = odeint(self.func,self.x,t,args=(s,))[-1]
         return self.output()#return y
 
@@ -48,9 +49,11 @@ class cpg(object):
         tau*dx0/dt   = -x0 - yA + s - bx1
         tau*dx1/dt  = (-x1 + y)/T
         """
-        x = np.hsplit(vector,2)
+        x0,x1 = np.hsplit(vector,2)#vector.ndim = 1
         y = self.output()
-        return self.tau*np.r_[(-x[0]-y.dot(A)+s-self.b*x[1]),(-x[1]+y)/self.T]
+        #print('cpg x',x0,x1,y,s)
+        #print(-x0-y.dot(self.A)+s-self.b*x1)
+        return self.tau*np.r_[-x0-y.dot(self.A)+s-self.b*x1,(-x1+y)/self.T]
 
 
 if __name__ == '__main__':
