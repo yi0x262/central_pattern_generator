@@ -1,4 +1,4 @@
-#!/usr/env/bin python3
+#!/usr/env/bin python2
 import numpy as np
 from scipy.integrate import odeint
 

@@ -22,7 +22,7 @@ class logger(object):
         """
         logpath : abs dir path
         """
-        os.makedirs(logpath,exist_ok=True)
+        #os.makedirs(logpath)#,exist_ok=True)
         savedir = logpath+'/'+datetime.now().strftime('%Y%m%d_%H%M%S')#get nowtime(YearmonthDay_HourMinuteSecond)
 
         figure = plt.figure(figsize=(16,3*len(self.lognames)))
