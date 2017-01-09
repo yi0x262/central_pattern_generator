@@ -30,6 +30,10 @@ class cpg(object):
         """s:input vector (ndim = 1)"""
         t = np.linspace(0,dt,devide+1)
         #print('cpg_call',s,self.x)
+        print 'cpg x:\n',self.x
+        print 'cpg A:\n',self.A
+        print 'cpg s:\n',s
+        print 'cpg dt:\t',dt
         self.x = odeint(self.func,self.x,t,args=(s,))[-1]
         return self.output()#return y
 
@@ -46,8 +50,8 @@ class cpg(object):
         y   : output. y = g(x) = max(0,x)
         tau : time cources for frequence
 
-        tau*dx0/dt   = -x0 - yA + s - bx1
-        tau*dx1/dt  = (-x1 + y)/T
+        tau*dx0/dt = -x0 - yA + s - bx1
+        tau*dx1/dt = (-x1 + y)/T
         """
         x0,x1 = np.hsplit(vector,2)#vector.ndim = 1
         y = self.output()
@@ -64,13 +68,13 @@ if __name__ == '__main__':
     #A = a - a*np.eye(neuronum)
     A = a - a*np.tri(neuronum)
     A += A.T
-    print(A)
+    print A
     #x0 = [0.25,-0.32]
     #x0 = [0.6,0.4,0.2,0]
     x0 = [0.01 * i for i in range(neuronum)]
     #x0 = x0+[0.081 for _ in range(neuronum)]
     x0 = x0+[0 for _ in range(neuronum)]
-    print(x0)
+    print x0
 
     c = cpg(neuronum,A,x0=x0,tau=2)
 
